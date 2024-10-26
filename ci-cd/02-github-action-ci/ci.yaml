@@ -23,4 +23,4 @@ jobs:
 
       - name: Run tests
         run: python -m unittest discover
-        working-directory: path/to/directory
+        working-directory: ci-cd/02-github-action-ci
