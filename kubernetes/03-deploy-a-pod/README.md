@@ -58,6 +58,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: my-first-pod
+  labels:
+    app: nginx
 spec:
   containers:
   - name: my-container
