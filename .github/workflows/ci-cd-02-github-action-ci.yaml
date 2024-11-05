@@ -22,5 +22,7 @@ jobs:
           python-version: '3.x'
       
       - name: Run tests
-        run: python -m unittest discover
+        run: |
+          sleep 30  # Add a delay of 30 seconds
+          python -m unittest discover
         working-directory: ci-cd/02-github-action-ci
