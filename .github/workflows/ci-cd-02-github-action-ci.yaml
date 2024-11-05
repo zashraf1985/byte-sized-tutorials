@@ -20,7 +20,8 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
-
+      
+      # fake comment to trigger the workflow
       - name: Run tests
         run: python -m unittest discover
         working-directory: ci-cd/02-github-action-ci
