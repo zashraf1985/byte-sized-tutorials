@@ -1,0 +1,67 @@
+name: CI/CD - 04 - GitHub Actions Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Build and tag Docker image
+      - name: Build and tag Docker image
+        run: |
+          docker build -t my-app:${{ github.sha }} .
+          docker tag my-app:${{ github.sha }} \
+            username/my-app:${{ github.sha }}
+
+      # Step 3: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | \
+            docker login -u "${{ secrets.DOCKER_USERNAME }}" \
+            --password-stdin
+
+      # Step 4: Push Docker image to Docker Hub
+      - name: Push Docker image
+        run: |
+          docker push username/my-app:${{ github.sha }}
+
+      # Step 5: Pull Docker image on the server
+      - name: Pull Docker image
+        run: |
+          echo "${{ secrets.SSH_KEY }}" > ssh_key
+          chmod 600 ssh_key
+          ssh -i ssh_key \
+            -o StrictHostKeyChecking=no \
+            user@your-server \
+            "docker pull username/my-app:${{ github.sha }}"
+
+      # Step 6: Stop and remove the existing container
+      - name: Stop and remove existing container
+        run: |
+          ssh -i ssh_key \
+            -o StrictHostKeyChecking=no \
+            user@your-server \
+            "docker stop my-app || true"
+          ssh -i ssh_key \
+            -o StrictHostKeyChecking=no \
+            user@your-server \
+            "docker rm my-app || true"
+
+      # Step 7: Run the new container
+      - name: Run the new container
+        run: |
+          ssh -i ssh_key \
+            -o StrictHostKeyChecking=no \
+            user@your-server \
+            "docker run -d \
+            --name my-app \
+            -p 80:80 \
+            username/my-app:${{ github.sha }}"
